@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cuban Energy Crisis Dashboard</title>
+    <title>Panel de Crisis Energética Cubana</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
       * {
@@ -223,27 +223,27 @@
   <body>
     <div class="container">
       <div class="header">
-        <h1>🔌 Cuban Energy Crisis Dashboard</h1>
-        <p>Tracking of Cuba's electrical grid capacity and deficits</p>
+        <h1>🔌 Panel de Crisis Energética Cubana</h1>
+        <p>Seguimiento de la capacidad y los déficits de la red eléctrica de Cuba</p>
       </div>
 
       <div class="filters" style="display: none" id="filtersSection">
-        <h3>📊 Filters & Controls</h3>
+        <h3>📊 Filtros y Controles</h3>
         <div class="filter-controls">
           <div class="filter-group">
-            <label>Date Range:</label>
+            <label>Rango de Fechas:</label>
             <input type="date" id="startDate" />
           </div>
           <div class="filter-group">
-            <label>to</label>
+            <label>a</label>
             <input type="date" id="endDate" />
           </div>
           <div class="filter-group">
-            <label>View Type:</label>
+            <label>Tipo de Vista:</label>
             <select id="viewType">
-              <option value="daily">Daily View</option>
-              <option value="weekly">Weekly Average</option>
-              <option value="trend">Trend Analysis</option>
+              <option value="daily">Vista Diaria</option>
+              <option value="weekly">Promedio Semanal</option>
+              <option value="trend">Análisis de Tendencia</option>
             </select>
           </div>
         </div>
@@ -252,45 +252,45 @@
       <div class="metrics-grid" id="metricsGrid" style="display: none">
         <div class="metric-card">
           <div class="metric-value deficit" id="avgDeficit">0</div>
-          <div class="metric-label">Avg Daily Deficit (MW)</div>
+          <div class="metric-label">Déficit Diario Promedio (MW)</div>
         </div>
         <div class="metric-card">
           <div class="metric-value capacity" id="avgCapacity">0</div>
-          <div class="metric-label">Avg Capacity (MW)</div>
+          <div class="metric-label">Capacidad Promedio (MW)</div>
         </div>
         <div class="metric-card">
           <div class="metric-value demand" id="avgDemand">0</div>
-          <div class="metric-label">Avg Demand (MW)</div>
+          <div class="metric-label">Demanda Promedio (MW)</div>
         </div>
         <div class="metric-card">
           <div class="metric-value solar" id="avgSolar">0</div>
-          <div class="metric-label">Avg Solar (MWh)</div>
+          <div class="metric-label">Solar Promedio (MWh)</div>
         </div>
       </div>
 
       <div class="charts-grid" id="chartsGrid" style="display: none">
         <div class="chart-container">
-          <div class="chart-title">⚡ Capacity vs Demand Timeline</div>
+          <div class="chart-title">⚡ Línea de Tiempo: Capacidad vs Demanda</div>
           <canvas id="capacityChart"></canvas>
         </div>
 
         <div class="chart-container">
-          <div class="chart-title">🔴 Daily Deficit Tracking</div>
+          <div class="chart-title">🔴 Seguimiento Diario del Déficit</div>
           <canvas id="deficitChart"></canvas>
         </div>
 
         <div class="chart-container">
-          <div class="chart-title">☀️ Solar Energy Production</div>
+          <div class="chart-title">☀️ Producción de Energía Solar</div>
           <canvas id="solarChart"></canvas>
         </div>
 
         <div class="chart-container">
-          <div class="chart-title">📈 Peak Hour Projections vs Reality</div>
+          <div class="chart-title">📈 Proyecciones vs Realidad en Horas Pico</div>
           <canvas id="peakChart"></canvas>
         </div>
 
         <div class="chart-container full-width">
-          <div class="chart-title">📊 Complete Energy Overview</div>
+          <div class="chart-title">📊 Resumen Completo de Energía</div>
           <canvas id="overviewChart"></canvas>
         </div>
       </div>
@@ -313,7 +313,7 @@
             initializeDashboard();
           })
           .catch((error) => {
-            alert("Error loading JSON data: " + error.message);
+            alert("Error al cargar los datos JSON: " + error.message);
           });
       }
 
@@ -365,7 +365,7 @@
       function createCharts() {
         const labels = energyData.map((d) => {
           const date = new Date(d.message_date);
-          return date.toLocaleDateString("en-US", {
+          return date.toLocaleDateString("es-ES", {
             month: "short",
             day: "numeric",
           });
@@ -379,7 +379,7 @@
             labels: labels,
             datasets: [
               {
-                label: "Available Capacity",
+                label: "Capacidad Disponible",
                 data: energyData.map(
                   (d) => d.energy_data?.availability_mw || 0,
                 ),
@@ -389,7 +389,7 @@
                 fill: true,
               },
               {
-                label: "Demand",
+                label: "Demanda",
                 data: energyData.map((d) => d.energy_data?.demand_mw || 0),
                 borderColor: "#f59e0b",
                 backgroundColor: "rgba(245, 158, 11, 0.1)",
@@ -414,7 +414,7 @@
                 beginAtZero: true,
                 title: {
                   display: true,
-                  text: "Megawatts (MW)",
+                  text: "Megavatios (MW)",
                 },
               },
             },
@@ -429,7 +429,7 @@
             labels: labels,
             datasets: [
               {
-                label: "Current Deficit",
+                label: "Déficit Actual",
                 data: energyData.map(
                   (d) => d.energy_data?.current_affectation_mw || 0,
                 ),
@@ -451,7 +451,7 @@
                 beginAtZero: true,
                 title: {
                   display: true,
-                  text: "Deficit (MW)",
+                  text: "Déficit (MW)",
                 },
               },
             },
@@ -466,7 +466,7 @@
             labels: labels,
             datasets: [
               {
-                label: "Solar Production",
+                label: "Producción Solar",
                 data: energyData.map(
                   (d) => d.energy_data?.solar_production_mwh || 0,
                 ),
@@ -489,7 +489,7 @@
                 beginAtZero: true,
                 title: {
                   display: true,
-                  text: "Energy (MWh)",
+                  text: "Energía (MWh)",
                 },
               },
             },
@@ -504,7 +504,7 @@
             labels: labels,
             datasets: [
               {
-                label: "Peak Projected Availability",
+                label: "Proyección Pico Capacidad",
                 data: energyData.map(
                   (d) => d.energy_data?.peak_projected_availability_mw || 0,
                 ),
@@ -513,7 +513,7 @@
                 tension: 0.4,
               },
               {
-                label: "Peak Projected Demand",
+                label: "Proyección Pico Demanda",
                 data: energyData.map(
                   (d) => d.energy_data?.peak_projected_demand_mw || 0,
                 ),
@@ -535,7 +535,7 @@
                 beginAtZero: true,
                 title: {
                   display: true,
-                  text: "Megawatts (MW)",
+                  text: "Megavatios (MW)",
                 },
               },
             },
@@ -550,7 +550,7 @@
             labels: labels,
             datasets: [
               {
-                label: "Available Capacity",
+                label: "Capacidad Disponible",
                 data: energyData.map(
                   (d) => d.energy_data?.availability_mw || 0,
                 ),
@@ -559,14 +559,14 @@
                 yAxisID: "y",
               },
               {
-                label: "Demand",
+                label: "Demanda",
                 data: energyData.map((d) => d.energy_data?.demand_mw || 0),
                 borderColor: "#f59e0b",
                 backgroundColor: "rgba(245, 158, 11, 0.1)",
                 yAxisID: "y",
               },
               {
-                label: "Deficit",
+                label: "Déficit",
                 data: energyData.map(
                   (d) => d.energy_data?.current_affectation_mw || 0,
                 ),
@@ -575,7 +575,7 @@
                 yAxisID: "y",
               },
               {
-                label: "Solar Production",
+                label: "Producción Solar",
                 data: energyData.map(
                   (d) => d.energy_data?.solar_production_mwh || 0,
                 ),
@@ -603,7 +603,7 @@
                 position: "left",
                 title: {
                   display: true,
-                  text: "Power (MW)",
+                  text: "Potencia (MW)",
                 },
               },
               y1: {
@@ -612,7 +612,7 @@
                 position: "right",
                 title: {
                   display: true,
-                  text: "Energy (MWh)",
+                  text: "Energía (MWh)",
                 },
                 grid: {
                   drawOnChartArea: false,
@@ -727,7 +727,7 @@
       function updateChartsWithData(data) {
         const labels = data.map((d) => {
           const date = new Date(d.message_date);
-          return date.toLocaleDateString("en-US", {
+          return date.toLocaleDateString("es-ES", {
             month: "short",
             day: "numeric",
           });
