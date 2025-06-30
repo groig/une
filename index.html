@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cuban Energy Crisis Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #333;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        color: white;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        font-weight: 300;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        font-size: 1.1em;
+        opacity: 0.9;
+      }
+
+      .filters {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+      }
+
+      .filters h3 {
+        margin-bottom: 15px;
+        color: #4a5568;
+      }
+
+      .filter-controls {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .filter-group label {
+        font-size: 0.9em;
+        font-weight: 600;
+        color: #4a5568;
+      }
+
+      .filter-group input,
+      .filter-group select {
+        padding: 8px 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.9em;
+        transition: border-color 0.3s ease;
+      }
+
+      .filter-group input:focus,
+      .filter-group select:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .metric-card {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 25px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        transition: transform 0.3s ease;
+      }
+
+      .metric-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .metric-value {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .metric-label {
+        font-size: 1em;
+        color: #6b7280;
+        font-weight: 500;
+      }
+
+      .deficit {
+        color: #ef4444;
+      }
+      .capacity {
+        color: #3b82f6;
+      }
+      .demand {
+        color: #f59e0b;
+      }
+      .solar {
+        color: #10b981;
+      }
+
+      .charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+      }
+
+      .chart-container {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+      }
+
+      .chart-title {
+        font-size: 1.3em;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #374151;
+        text-align: center;
+      }
+
+      .full-width {
+        grid-column: 1 / -1;
+      }
+
+      @media (max-width: 768px) {
+        .charts-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .filter-controls {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .header h1 {
+          font-size: 2em;
+        }
+      }
+
+      .load-data-section {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 25px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .file-input {
+        margin: 15px;
+        padding: 10px 20px;
+        border: 2px dashed #667eea;
+        border-radius: 10px;
+        background: #f8fafc;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .file-input:hover {
+        background: #e2e8f0;
+        border-color: #4c51bf;
+      }
+
+      .sample-data-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1em;
+        font-weight: 600;
+        transition: transform 0.3s ease;
+      }
+
+      .sample-data-btn:hover {
+        transform: translateY(-2px);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🔌 Cuban Energy Crisis Dashboard</h1>
+        <p>Tracking of Cuba's electrical grid capacity and deficits</p>
+      </div>
+
+      <div class="filters" style="display: none" id="filtersSection">
+        <h3>📊 Filters & Controls</h3>
+        <div class="filter-controls">
+          <div class="filter-group">
+            <label>Date Range:</label>
+            <input type="date" id="startDate" />
+          </div>
+          <div class="filter-group">
+            <label>to</label>
+            <input type="date" id="endDate" />
+          </div>
+          <div class="filter-group">
+            <label>View Type:</label>
+            <select id="viewType">
+              <option value="daily">Daily View</option>
+              <option value="weekly">Weekly Average</option>
+              <option value="trend">Trend Analysis</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="metrics-grid" id="metricsGrid" style="display: none">
+        <div class="metric-card">
+          <div class="metric-value deficit" id="avgDeficit">0</div>
+          <div class="metric-label">Avg Daily Deficit (MW)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value capacity" id="avgCapacity">0</div>
+          <div class="metric-label">Avg Capacity (MW)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value demand" id="avgDemand">0</div>
+          <div class="metric-label">Avg Demand (MW)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value solar" id="avgSolar">0</div>
+          <div class="metric-label">Avg Solar (MWh)</div>
+        </div>
+      </div>
+
+      <div class="charts-grid" id="chartsGrid" style="display: none">
+        <div class="chart-container">
+          <div class="chart-title">⚡ Capacity vs Demand Timeline</div>
+          <canvas id="capacityChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+          <div class="chart-title">🔴 Daily Deficit Tracking</div>
+          <canvas id="deficitChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+          <div class="chart-title">☀️ Solar Energy Production</div>
+          <canvas id="solarChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+          <div class="chart-title">📈 Peak Hour Projections vs Reality</div>
+          <canvas id="peakChart"></canvas>
+        </div>
+
+        <div class="chart-container full-width">
+          <div class="chart-title">📊 Complete Energy Overview</div>
+          <canvas id="overviewChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let energyData = [];
+      let charts = {};
+
+      function loadDataFromURL(jsonUrl) {
+        fetch(jsonUrl)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            energyData = data;
+            initializeDashboard();
+          })
+          .catch((error) => {
+            alert("Error loading JSON data: " + error.message);
+          });
+      }
+
+      loadDataFromURL("data.json");
+
+      function initializeDashboard() {
+        document.getElementById("filtersSection").style.display = "block";
+        document.getElementById("metricsGrid").style.display = "grid";
+        document.getElementById("chartsGrid").style.display = "grid";
+
+        updateMetrics();
+        createCharts();
+        setupDateFilters();
+      }
+
+      function updateMetrics() {
+        const validData = energyData.filter((d) => d.energy_data);
+
+        const avgDeficit =
+          validData.reduce(
+            (sum, d) => sum + (d.energy_data.current_affectation_mw || 0),
+            0,
+          ) / validData.length;
+        const avgCapacity =
+          validData.reduce(
+            (sum, d) => sum + (d.energy_data.availability_mw || 0),
+            0,
+          ) / validData.length;
+        const avgDemand =
+          validData.reduce(
+            (sum, d) => sum + (d.energy_data.demand_mw || 0),
+            0,
+          ) / validData.length;
+        const avgSolar =
+          validData.reduce(
+            (sum, d) => sum + (d.energy_data.solar_production_mwh || 0),
+            0,
+          ) / validData.length;
+
+        document.getElementById("avgDeficit").textContent =
+          Math.round(avgDeficit);
+        document.getElementById("avgCapacity").textContent =
+          Math.round(avgCapacity);
+        document.getElementById("avgDemand").textContent =
+          Math.round(avgDemand);
+        document.getElementById("avgSolar").textContent = Math.round(avgSolar);
+      }
+
+      function createCharts() {
+        const labels = energyData.map((d) => {
+          const date = new Date(d.message_date);
+          return date.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          });
+        });
+
+        // Capacity vs Demand Chart
+        const ctx1 = document.getElementById("capacityChart").getContext("2d");
+        charts.capacity = new Chart(ctx1, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Available Capacity",
+                data: energyData.map(
+                  (d) => d.energy_data?.availability_mw || 0,
+                ),
+                borderColor: "#3b82f6",
+                backgroundColor: "rgba(59, 130, 246, 0.1)",
+                tension: 0.4,
+                fill: true,
+              },
+              {
+                label: "Demand",
+                data: energyData.map((d) => d.energy_data?.demand_mw || 0),
+                borderColor: "#f59e0b",
+                backgroundColor: "rgba(245, 158, 11, 0.1)",
+                tension: 0.4,
+                fill: true,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            interaction: {
+              intersect: false,
+              mode: "index",
+            },
+            plugins: {
+              legend: {
+                position: "top",
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: "Megawatts (MW)",
+                },
+              },
+            },
+          },
+        });
+
+        // Deficit Chart
+        const ctx2 = document.getElementById("deficitChart").getContext("2d");
+        charts.deficit = new Chart(ctx2, {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Current Deficit",
+                data: energyData.map(
+                  (d) => d.energy_data?.current_affectation_mw || 0,
+                ),
+                backgroundColor: "rgba(239, 68, 68, 0.8)",
+                borderColor: "#ef4444",
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: "Deficit (MW)",
+                },
+              },
+            },
+          },
+        });
+
+        // Solar Chart
+        const ctx3 = document.getElementById("solarChart").getContext("2d");
+        charts.solar = new Chart(ctx3, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Solar Production",
+                data: energyData.map(
+                  (d) => d.energy_data?.solar_production_mwh || 0,
+                ),
+                borderColor: "#10b981",
+                backgroundColor: "rgba(16, 185, 129, 0.2)",
+                tension: 0.4,
+                fill: true,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: "Energy (MWh)",
+                },
+              },
+            },
+          },
+        });
+
+        // Peak Projections Chart
+        const ctx4 = document.getElementById("peakChart").getContext("2d");
+        charts.peak = new Chart(ctx4, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Peak Projected Availability",
+                data: energyData.map(
+                  (d) => d.energy_data?.peak_projected_availability_mw || 0,
+                ),
+                borderColor: "#8b5cf6",
+                backgroundColor: "rgba(139, 92, 246, 0.1)",
+                tension: 0.4,
+              },
+              {
+                label: "Peak Projected Demand",
+                data: energyData.map(
+                  (d) => d.energy_data?.peak_projected_demand_mw || 0,
+                ),
+                borderColor: "#f97316",
+                backgroundColor: "rgba(249, 115, 22, 0.1)",
+                tension: 0.4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: "Megawatts (MW)",
+                },
+              },
+            },
+          },
+        });
+
+        // Overview Chart
+        const ctx5 = document.getElementById("overviewChart").getContext("2d");
+        charts.overview = new Chart(ctx5, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Available Capacity",
+                data: energyData.map(
+                  (d) => d.energy_data?.availability_mw || 0,
+                ),
+                borderColor: "#3b82f6",
+                backgroundColor: "rgba(59, 130, 246, 0.1)",
+                yAxisID: "y",
+              },
+              {
+                label: "Demand",
+                data: energyData.map((d) => d.energy_data?.demand_mw || 0),
+                borderColor: "#f59e0b",
+                backgroundColor: "rgba(245, 158, 11, 0.1)",
+                yAxisID: "y",
+              },
+              {
+                label: "Deficit",
+                data: energyData.map(
+                  (d) => d.energy_data?.current_affectation_mw || 0,
+                ),
+                borderColor: "#ef4444",
+                backgroundColor: "rgba(239, 68, 68, 0.1)",
+                yAxisID: "y",
+              },
+              {
+                label: "Solar Production",
+                data: energyData.map(
+                  (d) => d.energy_data?.solar_production_mwh || 0,
+                ),
+                borderColor: "#10b981",
+                backgroundColor: "rgba(16, 185, 129, 0.1)",
+                yAxisID: "y1",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            interaction: {
+              mode: "index",
+              intersect: false,
+            },
+            plugins: {
+              legend: {
+                position: "top",
+              },
+            },
+            scales: {
+              y: {
+                type: "linear",
+                display: true,
+                position: "left",
+                title: {
+                  display: true,
+                  text: "Power (MW)",
+                },
+              },
+              y1: {
+                type: "linear",
+                display: true,
+                position: "right",
+                title: {
+                  display: true,
+                  text: "Energy (MWh)",
+                },
+                grid: {
+                  drawOnChartArea: false,
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function setupDateFilters() {
+        const dates = energyData.map((d) => new Date(d.message_date));
+        const minDate = new Date(Math.min(...dates));
+        const maxDate = new Date(Math.max(...dates));
+
+        document.getElementById("startDate").value = minDate
+          .toISOString()
+          .split("T")[0];
+        document.getElementById("endDate").value = maxDate
+          .toISOString()
+          .split("T")[0];
+
+        // Add event listeners for filtering
+        document
+          .getElementById("startDate")
+          .addEventListener("change", filterData);
+        document
+          .getElementById("endDate")
+          .addEventListener("change", filterData);
+        document
+          .getElementById("viewType")
+          .addEventListener("change", filterData);
+      }
+
+      function filterData() {
+        const startDate = new Date(document.getElementById("startDate").value);
+        const endDate = new Date(document.getElementById("endDate").value);
+        const viewType = document.getElementById("viewType").value;
+
+        // Filter data by date range
+        let filteredData = energyData.filter((d) => {
+          const messageDate = new Date(d.message_date);
+          return messageDate >= startDate && messageDate <= endDate;
+        });
+
+        // Apply view type filtering if needed
+        if (viewType === "last7days") {
+          const sevenDaysAgo = new Date();
+          sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+          filteredData = energyData.filter((d) => {
+            const messageDate = new Date(d.message_date);
+            return messageDate >= sevenDaysAgo;
+          });
+        } else if (viewType === "last30days") {
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          filteredData = energyData.filter((d) => {
+            const messageDate = new Date(d.message_date);
+            return messageDate >= thirtyDaysAgo;
+          });
+        }
+
+        // Update metrics with filtered data
+        updateMetricsWithData(filteredData);
+
+        // Update all charts with filtered data
+        updateChartsWithData(filteredData);
+      }
+
+      function updateMetricsWithData(data) {
+        const validData = data.filter((d) => d.energy_data);
+
+        if (validData.length === 0) {
+          // Handle empty data case
+          document.getElementById("avgDeficit").textContent = "0";
+          document.getElementById("avgCapacity").textContent = "0";
+          document.getElementById("avgDemand").textContent = "0";
+          document.getElementById("avgSolar").textContent = "0";
+          return;
+        }
+
+        const avgDeficit =
+          validData.reduce(
+            (sum, d) => sum + (d.energy_data.current_affectation_mw || 0),
+            0,
+          ) / validData.length;
+        const avgCapacity =
+          validData.reduce(
+            (sum, d) => sum + (d.energy_data.availability_mw || 0),
+            0,
+          ) / validData.length;
+        const avgDemand =
+          validData.reduce(
+            (sum, d) => sum + (d.energy_data.demand_mw || 0),
+            0,
+          ) / validData.length;
+        const avgSolar =
+          validData.reduce(
+            (sum, d) => sum + (d.energy_data.solar_production_mwh || 0),
+            0,
+          ) / validData.length;
+
+        document.getElementById("avgDeficit").textContent =
+          Math.round(avgDeficit);
+        document.getElementById("avgCapacity").textContent =
+          Math.round(avgCapacity);
+        document.getElementById("avgDemand").textContent =
+          Math.round(avgDemand);
+        document.getElementById("avgSolar").textContent = Math.round(avgSolar);
+      }
+
+      function updateChartsWithData(data) {
+        const labels = data.map((d) => {
+          const date = new Date(d.message_date);
+          return date.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          });
+        });
+
+        // Update Capacity vs Demand Chart
+        if (charts.capacity) {
+          charts.capacity.data.labels = labels;
+          charts.capacity.data.datasets[0].data = data.map(
+            (d) => d.energy_data?.availability_mw || 0,
+          );
+          charts.capacity.data.datasets[1].data = data.map(
+            (d) => d.energy_data?.demand_mw || 0,
+          );
+          charts.capacity.update();
+        }
+
+        // Update Deficit Chart
+        if (charts.deficit) {
+          charts.deficit.data.labels = labels;
+          charts.deficit.data.datasets[0].data = data.map(
+            (d) => d.energy_data?.current_affectation_mw || 0,
+          );
+          charts.deficit.update();
+        }
+
+        // Update Solar Chart
+        if (charts.solar) {
+          charts.solar.data.labels = labels;
+          charts.solar.data.datasets[0].data = data.map(
+            (d) => d.energy_data?.solar_production_mwh || 0,
+          );
+          charts.solar.update();
+        }
+
+        // Update Peak Projections Chart
+        if (charts.peak) {
+          charts.peak.data.labels = labels;
+          charts.peak.data.datasets[0].data = data.map(
+            (d) => d.energy_data?.peak_projected_availability_mw || 0,
+          );
+          charts.peak.data.datasets[1].data = data.map(
+            (d) => d.energy_data?.peak_projected_demand_mw || 0,
+          );
+          charts.peak.update();
+        }
+
+        // Update Overview Chart
+        if (charts.overview) {
+          charts.overview.data.labels = labels;
+          charts.overview.data.datasets[0].data = data.map(
+            (d) => d.energy_data?.availability_mw || 0,
+          );
+          charts.overview.data.datasets[1].data = data.map(
+            (d) => d.energy_data?.demand_mw || 0,
+          );
+          charts.overview.data.datasets[2].data = data.map(
+            (d) => d.energy_data?.current_affectation_mw || 0,
+          );
+          charts.overview.data.datasets[3].data = data.map(
+            (d) => d.energy_data?.solar_production_mwh || 0,
+          );
+          charts.overview.update();
+        }
+      }
+
+      // Also add a reset filter function for convenience
+      function resetFilters() {
+        const dates = energyData.map((d) => new Date(d.message_date));
+        const minDate = new Date(Math.min(...dates));
+        const maxDate = new Date(Math.max(...dates));
+
+        document.getElementById("startDate").value = minDate
+          .toISOString()
+          .split("T")[0];
+        document.getElementById("endDate").value = maxDate
+          .toISOString()
+          .split("T")[0];
+        document.getElementById("viewType").value = "custom";
+
+        // Reset to original data
+        updateMetricsWithData(energyData);
+        updateChartsWithData(energyData);
+      }
+    </script>
+  </body>
+</html>
