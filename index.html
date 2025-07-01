@@ -264,7 +264,7 @@
         </div>
         <div class="metric-card">
           <div class="metric-value solar" id="avgSolar">0</div>
-          <div class="metric-label">Solar Promedio (MWh)</div>
+          <div class="metric-label">Solar Promedio (MW)</div>
         </div>
       </div>
 
@@ -349,7 +349,7 @@
           ) / validData.length;
         const avgSolar =
           validData.reduce(
-            (sum, d) => sum + (d.energy_data.solar_production_mwh || 0),
+            (sum, d) => sum + (d.energy_data.solar_production_mw || 0),
             0,
           ) / validData.length;
 
@@ -468,7 +468,7 @@
               {
                 label: "Producción Solar",
                 data: energyData.map(
-                  (d) => d.energy_data?.solar_production_mwh || 0,
+                  (d) => d.energy_data?.solar_production_mw || 0,
                 ),
                 borderColor: "#10b981",
                 backgroundColor: "rgba(16, 185, 129, 0.2)",
@@ -489,7 +489,7 @@
                 beginAtZero: true,
                 title: {
                   display: true,
-                  text: "Energía (MWh)",
+                  text: "Energía (MW)",
                 },
               },
             },
@@ -582,11 +582,11 @@
               {
                 label: "Producción Solar",
                 data: energyData.map(
-                  (d) => d.energy_data?.solar_production_mwh || 0,
+                  (d) => d.energy_data?.solar_production_mw || 0,
                 ),
                 borderColor: "#10b981",
                 backgroundColor: "rgba(16, 185, 129, 0.1)",
-                yAxisID: "y1",
+                yAxisID: "y",
                 fill: true,
               },
             ],
@@ -610,18 +610,6 @@
                 title: {
                   display: true,
                   text: "Potencia (MW)",
-                },
-              },
-              y1: {
-                type: "linear",
-                display: true,
-                position: "right",
-                title: {
-                  display: true,
-                  text: "Energía (MWh)",
-                },
-                grid: {
-                  drawOnChartArea: false,
                 },
               },
             },
@@ -717,7 +705,7 @@
           ) / validData.length;
         const avgSolar =
           validData.reduce(
-            (sum, d) => sum + (d.energy_data.solar_production_mwh || 0),
+            (sum, d) => sum + (d.energy_data.solar_production_mw || 0),
             0,
           ) / validData.length;
 
@@ -764,7 +752,7 @@
         if (charts.solar) {
           charts.solar.data.labels = labels;
           charts.solar.data.datasets[0].data = data.map(
-            (d) => d.energy_data?.solar_production_mwh || 0,
+            (d) => d.energy_data?.solar_production_mw || 0,
           );
           charts.solar.update();
         }
@@ -794,7 +782,7 @@
             (d) => d.energy_data?.current_affectation_mw || 0,
           );
           charts.overview.data.datasets[3].data = data.map(
-            (d) => d.energy_data?.solar_production_mwh || 0,
+            (d) => d.energy_data?.solar_production_mw || 0,
           );
           charts.overview.update();
         }

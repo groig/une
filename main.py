@@ -114,7 +114,7 @@ class CubanEnergyReportExtractor:
             text,
         )
         if solar_production_match:
-            data["solar_production_mwh"] = clean_number(solar_production_match)
+            data["solar_production_mw"] = clean_number(solar_production_match) / 6
 
         solar_peak_match = re.search(r"con ([\d,]+) MW como máxima potencia", text)
         if solar_peak_match:
@@ -203,7 +203,7 @@ class CubanEnergyReportExtractor:
                     f"  Current Deficit: {energy_data.get('current_affectation_mw', 'N/A')} MW"
                 )
                 print(
-                    f"  Solar Production: {energy_data.get('solar_production_mwh', 'N/A')} MWh"
+                    f"  Avg Solar Production (6 hrs): {energy_data.get('solar_production_mw', 'N/A')} MW"
                 )
 
 
