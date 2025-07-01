@@ -240,14 +240,6 @@
             <label>a</label>
             <input type="date" id="endDate" />
           </div>
-          <div class="filter-group">
-            <label>Tipo de Vista:</label>
-            <select id="viewType">
-              <option value="daily">Vista Diaria</option>
-              <option value="weekly">Promedio Semanal</option>
-              <option value="trend">Análisis de Tendencia</option>
-            </select>
-          </div>
         </div>
       </div>
 
@@ -648,15 +640,11 @@
         document
           .getElementById("endDate")
           .addEventListener("change", filterData);
-        document
-          .getElementById("viewType")
-          .addEventListener("change", filterData);
       }
 
       function filterData() {
         const startDate = new Date(document.getElementById("startDate").value);
         const endDate = new Date(document.getElementById("endDate").value);
-        const viewType = document.getElementById("viewType").value;
 
         // Filter data by date range
         let filteredData = energyData.filter((d) => {
@@ -664,21 +652,6 @@
           return messageDate >= startDate && messageDate <= endDate;
         });
 
-        // Apply view type filtering if needed
-        if (viewType === "last7days") {
-          const sevenDaysAgo = new Date();
-          sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-          filteredData = energyData.filter((d) => {
-            const messageDate = new Date(d.message_date);
-            return messageDate >= sevenDaysAgo;
-          });
-        } else if (viewType === "last30days") {
-          const thirtyDaysAgo = new Date();
-          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-          filteredData = energyData.filter((d) => {
-            const messageDate = new Date(d.message_date);
-            return messageDate >= thirtyDaysAgo;
-          });
         }
 
         // Update metrics with filtered data
@@ -813,7 +786,6 @@
         document.getElementById("endDate").value = maxDate
           .toISOString()
           .split("T")[0];
-        document.getElementById("viewType").value = "custom";
 
         // Reset to original data
         updateMetricsWithData(energyData);
