@@ -224,7 +224,9 @@
     <div class="container">
       <div class="header">
         <h1>🔌 Panel de Crisis Energética Cubana</h1>
-        <p>Seguimiento de la capacidad y los déficits de la red eléctrica de Cuba</p>
+        <p>
+          Seguimiento de la capacidad y los déficits de la red eléctrica de Cuba
+        </p>
       </div>
 
       <div class="filters" style="display: none" id="filtersSection">
@@ -270,7 +272,9 @@
 
       <div class="charts-grid" id="chartsGrid" style="display: none">
         <div class="chart-container">
-          <div class="chart-title">⚡ Línea de Tiempo: Capacidad vs Demanda</div>
+          <div class="chart-title">
+            ⚡ Línea de Tiempo: Capacidad vs Demanda
+          </div>
           <canvas id="capacityChart"></canvas>
         </div>
 
@@ -285,7 +289,9 @@
         </div>
 
         <div class="chart-container">
-          <div class="chart-title">📈 Proyecciones vs Realidad en Horas Pico</div>
+          <div class="chart-title">
+            📈 Proyecciones vs Realidad en Horas Pico
+          </div>
           <canvas id="peakChart"></canvas>
         </div>
 
@@ -334,22 +340,23 @@
 
         const avgDeficit =
           validData.reduce(
-            (sum, d) => sum + (d.energy_data.previous_day_max_affectation_mw || 0),
+            (sum, d) =>
+              sum + (d.energy_data.previous_day_max_affectation_mw || null),
             0,
           ) / validData.length;
         const avgCapacity =
           validData.reduce(
-            (sum, d) => sum + (d.energy_data.availability_mw || 0),
+            (sum, d) => sum + (d.energy_data.availability_mw || null),
             0,
           ) / validData.length;
         const avgDemand =
           validData.reduce(
-            (sum, d) => sum + (d.energy_data.demand_mw || 0),
+            (sum, d) => sum + (d.energy_data.demand_mw || null),
             0,
           ) / validData.length;
         const avgSolar =
           validData.reduce(
-            (sum, d) => sum + (d.energy_data.solar_production_mw || 0),
+            (sum, d) => sum + (d.energy_data.solar_production_mw || null),
             0,
           ) / validData.length;
 
@@ -381,7 +388,7 @@
               {
                 label: "Capacidad Disponible",
                 data: energyData.map(
-                  (d) => d.energy_data?.availability_mw || 0,
+                  (d) => d.energy_data?.availability_mw || null,
                 ),
                 borderColor: "#3b82f6",
                 backgroundColor: "rgba(59, 130, 246, 0.1)",
@@ -390,7 +397,7 @@
               },
               {
                 label: "Demanda",
-                data: energyData.map((d) => d.energy_data?.demand_mw || 0),
+                data: energyData.map((d) => d.energy_data?.demand_mw || null),
                 borderColor: "#f59e0b",
                 backgroundColor: "rgba(245, 158, 11, 0.1)",
                 tension: 0.4,
@@ -400,6 +407,7 @@
           },
           options: {
             responsive: true,
+            spanGaps: true,
             interaction: {
               intersect: false,
               mode: "index",
@@ -431,7 +439,7 @@
               {
                 label: "Déficit Máximo",
                 data: energyData.map(
-                  (d) => d.energy_data?.previous_day_max_affectation_mw || 0,
+                  (d) => d.energy_data?.previous_day_max_affectation_mw || null,
                 ),
                 backgroundColor: "rgba(239, 68, 68, 0.8)",
                 borderColor: "#ef4444",
@@ -441,6 +449,7 @@
           },
           options: {
             responsive: true,
+            spanGaps: true,
             plugins: {
               legend: {
                 display: false,
@@ -468,7 +477,7 @@
               {
                 label: "Producción Solar",
                 data: energyData.map(
-                  (d) => d.energy_data?.solar_production_mw || 0,
+                  (d) => d.energy_data?.solar_production_mw || null,
                 ),
                 borderColor: "#10b981",
                 backgroundColor: "rgba(16, 185, 129, 0.2)",
@@ -479,6 +488,7 @@
           },
           options: {
             responsive: true,
+            spanGaps: true,
             plugins: {
               legend: {
                 display: false,
@@ -506,7 +516,7 @@
               {
                 label: "Proyección Pico Capacidad",
                 data: energyData.map(
-                  (d) => d.energy_data?.peak_projected_availability_mw || 0,
+                  (d) => d.energy_data?.peak_projected_availability_mw || null,
                 ),
                 borderColor: "#8b5cf6",
                 backgroundColor: "rgba(139, 92, 246, 0.1)",
@@ -516,7 +526,7 @@
               {
                 label: "Proyección Pico Demanda",
                 data: energyData.map(
-                  (d) => d.energy_data?.peak_projected_demand_mw || 0,
+                  (d) => d.energy_data?.peak_projected_demand_mw || null,
                 ),
                 borderColor: "#f97316",
                 backgroundColor: "rgba(249, 115, 22, 0.1)",
@@ -527,6 +537,7 @@
           },
           options: {
             responsive: true,
+            spanGaps: true,
             plugins: {
               legend: {
                 position: "top",
@@ -554,7 +565,7 @@
               {
                 label: "Capacidad Disponible",
                 data: energyData.map(
-                  (d) => d.energy_data?.availability_mw || 0,
+                  (d) => d.energy_data?.availability_mw || null,
                 ),
                 borderColor: "#3b82f6",
                 backgroundColor: "rgba(59, 130, 246, 0.1)",
@@ -563,7 +574,7 @@
               },
               {
                 label: "Demanda",
-                data: energyData.map((d) => d.energy_data?.demand_mw || 0),
+                data: energyData.map((d) => d.energy_data?.demand_mw || null),
                 borderColor: "#f59e0b",
                 backgroundColor: "rgba(245, 158, 11, 0.1)",
                 yAxisID: "y",
@@ -572,7 +583,7 @@
               {
                 label: "Déficit",
                 data: energyData.map(
-                  (d) => d.energy_data?.previous_day_max_affectation_mw || 0,
+                  (d) => d.energy_data?.previous_day_max_affectation_mw || null,
                 ),
                 borderColor: "#ef4444",
                 backgroundColor: "rgba(239, 68, 68, 0.1)",
@@ -582,7 +593,7 @@
               {
                 label: "Producción Solar",
                 data: energyData.map(
-                  (d) => d.energy_data?.solar_production_mw || 0,
+                  (d) => d.energy_data?.solar_production_mw || null,
                 ),
                 borderColor: "#10b981",
                 backgroundColor: "rgba(16, 185, 129, 0.1)",
@@ -593,6 +604,7 @@
           },
           options: {
             responsive: true,
+            spanGaps: true,
             interaction: {
               mode: "index",
               intersect: false,
@@ -690,22 +702,23 @@
 
         const avgDeficit =
           validData.reduce(
-            (sum, d) => sum + (d.energy_data.previous_day_max_affectation_mw || 0),
+            (sum, d) =>
+              sum + (d.energy_data.previous_day_max_affectation_mw || null),
             0,
           ) / validData.length;
         const avgCapacity =
           validData.reduce(
-            (sum, d) => sum + (d.energy_data.availability_mw || 0),
+            (sum, d) => sum + (d.energy_data.availability_mw || null),
             0,
           ) / validData.length;
         const avgDemand =
           validData.reduce(
-            (sum, d) => sum + (d.energy_data.demand_mw || 0),
+            (sum, d) => sum + (d.energy_data.demand_mw || null),
             0,
           ) / validData.length;
         const avgSolar =
           validData.reduce(
-            (sum, d) => sum + (d.energy_data.solar_production_mw || 0),
+            (sum, d) => sum + (d.energy_data.solar_production_mw || null),
             0,
           ) / validData.length;
 
@@ -731,10 +744,10 @@
         if (charts.capacity) {
           charts.capacity.data.labels = labels;
           charts.capacity.data.datasets[0].data = data.map(
-            (d) => d.energy_data?.availability_mw || 0,
+            (d) => d.energy_data?.availability_mw || null,
           );
           charts.capacity.data.datasets[1].data = data.map(
-            (d) => d.energy_data?.demand_mw || 0,
+            (d) => d.energy_data?.demand_mw || null,
           );
           charts.capacity.update();
         }
@@ -743,7 +756,7 @@
         if (charts.deficit) {
           charts.deficit.data.labels = labels;
           charts.deficit.data.datasets[0].data = data.map(
-            (d) => d.energy_data?.previous_day_max_affectation_mw || 0,
+            (d) => d.energy_data?.previous_day_max_affectation_mw || null,
           );
           charts.deficit.update();
         }
@@ -752,7 +765,7 @@
         if (charts.solar) {
           charts.solar.data.labels = labels;
           charts.solar.data.datasets[0].data = data.map(
-            (d) => d.energy_data?.solar_production_mw || 0,
+            (d) => d.energy_data?.solar_production_mw || null,
           );
           charts.solar.update();
         }
@@ -761,10 +774,10 @@
         if (charts.peak) {
           charts.peak.data.labels = labels;
           charts.peak.data.datasets[0].data = data.map(
-            (d) => d.energy_data?.peak_projected_availability_mw || 0,
+            (d) => d.energy_data?.peak_projected_availability_mw || null,
           );
           charts.peak.data.datasets[1].data = data.map(
-            (d) => d.energy_data?.peak_projected_demand_mw || 0,
+            (d) => d.energy_data?.peak_projected_demand_mw || null,
           );
           charts.peak.update();
         }
@@ -773,16 +786,16 @@
         if (charts.overview) {
           charts.overview.data.labels = labels;
           charts.overview.data.datasets[0].data = data.map(
-            (d) => d.energy_data?.availability_mw || 0,
+            (d) => d.energy_data?.availability_mw || null,
           );
           charts.overview.data.datasets[1].data = data.map(
-            (d) => d.energy_data?.demand_mw || 0,
+            (d) => d.energy_data?.demand_mw || null,
           );
           charts.overview.data.datasets[2].data = data.map(
-            (d) => d.energy_data?.previous_day_max_affectation_mw || 0,
+            (d) => d.energy_data?.previous_day_max_affectation_mw || null,
           );
           charts.overview.data.datasets[3].data = data.map(
-            (d) => d.energy_data?.solar_production_mw || 0,
+            (d) => d.energy_data?.solar_production_mw || null,
           );
           charts.overview.update();
         }
