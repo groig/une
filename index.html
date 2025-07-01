@@ -322,9 +322,10 @@
         document.getElementById("metricsGrid").style.display = "grid";
         document.getElementById("chartsGrid").style.display = "grid";
 
+        setupDateFilters();
         updateMetrics();
         createCharts();
-        setupDateFilters();
+        filterData();
       }
 
       function updateMetrics() {
@@ -623,7 +624,7 @@
 
       function setupDateFilters() {
         const dates = energyData.map((d) => new Date(d.message_date));
-        const minDate = new Date(Math.min(...dates));
+        const minDate = new Date("2025-01-01");
         const maxDate = new Date(Math.max(...dates));
 
         document.getElementById("startDate").value = minDate
@@ -772,23 +773,6 @@
         }
       }
 
-      // Also add a reset filter function for convenience
-      function resetFilters() {
-        const dates = energyData.map((d) => new Date(d.message_date));
-        const minDate = new Date(Math.min(...dates));
-        const maxDate = new Date(Math.max(...dates));
-
-        document.getElementById("startDate").value = minDate
-          .toISOString()
-          .split("T")[0];
-        document.getElementById("endDate").value = maxDate
-          .toISOString()
-          .split("T")[0];
-
-        // Reset to original data
-        updateMetricsWithData(energyData);
-        updateChartsWithData(energyData);
-      }
     </script>
   </body>
 </html>
