@@ -15,6 +15,8 @@ class CubanEnergyReportExtractor:
             r"Nota [iI]nformativa[.\-\s]*\n?\s*Situación del SEN (?:al|para el) (\d{1,2} de \w+ de \d{4})",
             # Even more flexible pattern
             r"(?:📢\s*)?Nota [iI]nformativa[.\-\s]*(?:\n?\s*)?Situación del SEN (?:al|para el) (\d{1,2} de \w+ de \d{4})",
+            # Pattern for messages that start directly with "Situación del SEN"
+            r"^Situación del SEN para el (\d{1,2} de \w+ de \d{4})",
         ]
 
     def load_telegram_data(self, file_path: str) -> Dict:
@@ -62,72 +64,154 @@ class CubanEnergyReportExtractor:
                 return int(match_obj.group(1).replace(",", ""))
             return None
 
-        # Extract current availability
-        availability_match = re.search(r"Disponibilidad:\s*([\d,]+)\s*MW", text)
-        if availability_match:
-            data["availability_mw"] = clean_number(availability_match)
+        # Extract current availability - multiple patterns
+        availability_patterns = [
+            r"Disponibilidad:\s*([\d,]+)\s*MW",  # Original format
+            r"disponibilidad del SEN a las \d{2}:\d{2} horas es de ([\d,]+) MW",  # New format
+            r"disponibilidad de ([\d,]+) MW",  # Generic format
+        ]
 
-        # Extract current demand
-        demand_match = re.search(r"Demanda:\s*([\d,]+)\s*MW", text)
-        if demand_match:
-            data["demand_mw"] = clean_number(demand_match)
+        for pattern in availability_patterns:
+            availability_match = re.search(pattern, text, re.IGNORECASE)
+            if availability_match:
+                data["availability_mw"] = clean_number(availability_match)
+                break
 
-        # Extract current deficit/affectation
-        affectation_match = re.search(r"Afectación actual:\s*([\d,]+)\s*MW", text)
-        if affectation_match:
-            data["current_affectation_mw"] = clean_number(affectation_match)
+        # Extract current demand - multiple patterns
+        demand_patterns = [
+            r"Demanda:\s*([\d,]+)\s*MW",  # Original format
+            r"la demanda ([\d,]+) MW",  # New format
+            r"demanda de ([\d,]+) MW",  # Alternative format
+        ]
 
-        # Extract peak hour projections
-        peak_availability_match = re.search(
-            r"Se proyecta una disponibilidad de ([\d,]+) MW", text
-        )
-        if peak_availability_match:
-            data["peak_projected_availability_mw"] = clean_number(
-                peak_availability_match
-            )
+        for pattern in demand_patterns:
+            demand_match = re.search(pattern, text, re.IGNORECASE)
+            if demand_match:
+                data["demand_mw"] = clean_number(demand_match)
+                break
 
-        peak_demand_match = re.search(r"una demanda de ([\d,]+)", text)
-        if peak_demand_match:
-            data["peak_projected_demand_mw"] = clean_number(peak_demand_match)
+        # Extract current deficit/affectation - multiple patterns
+        affectation_patterns = [
+            r"Afectación actual:\s*([\d,]+)\s*MW",  # Original format
+            r"con ([\d,]+) MW afectados",  # New format
+            r"afectación de ([\d,]+) MW",  # Generic format
+        ]
 
-        peak_deficit_match = re.search(r"déficit de ([\d,]+) MW", text)
-        if peak_deficit_match:
-            data["peak_projected_deficit_mw"] = clean_number(peak_deficit_match)
+        for pattern in affectation_patterns:
+            affectation_match = re.search(pattern, text, re.IGNORECASE)
+            if affectation_match:
+                data["current_affectation_mw"] = clean_number(affectation_match)
+                break
 
-        peak_affectation_match = re.search(r"para una afectación de ([\d,]+) MW", text)
-        if peak_affectation_match:
-            data["peak_projected_affectation_mw"] = clean_number(peak_affectation_match)
+        # Extract peak hour projections - improved patterns
+        peak_availability_patterns = [
+            r"Se proyecta una disponibilidad de ([\d,]+) MW",  # Original
+            r"se estima una disponibilidad de ([\d,]+) MW",  # New format
+            r"disponibilidad de ([\d,]+) MW.*(?:horario pico|pico)",  # Generic peak availability
+        ]
 
-        # Handle alternative wording for peak affectation
-        if not peak_affectation_match:
-            peak_affectation_alt = re.search(
-                r"afectación estimada de ([\d,]+) MW", text
-            )
-            if peak_affectation_alt:
-                data["peak_projected_affectation_mw"] = clean_number(
-                    peak_affectation_alt
+        for pattern in peak_availability_patterns:
+            peak_availability_match = re.search(pattern, text, re.IGNORECASE)
+            if peak_availability_match:
+                data["peak_projected_availability_mw"] = clean_number(
+                    peak_availability_match
                 )
+                break
 
-        # Extract solar production
-        solar_production_match = re.search(
-            r"Producción de energía de los \d+ parques solares fotovoltaicos: ([\d,]+) MWh",
-            text,
-        )
-        if solar_production_match:
-            data["solar_production_mw"] = clean_number(solar_production_match) / 6
+        # Peak demand - improved patterns
+        peak_demand_patterns = [
+            r"una demanda de ([\d,]+)",  # Original
+            r"demanda máxima de ([\d,]+) MW",  # New format
+            r"y una demanda de ([\d,]+)",  # Alternative
+        ]
 
-        solar_peak_match = re.search(r"con ([\d,]+) MW como máxima potencia", text)
-        if solar_peak_match:
-            data["solar_peak_power_mw"] = clean_number(solar_peak_match)
+        for pattern in peak_demand_patterns:
+            peak_demand_match = re.search(pattern, text, re.IGNORECASE)
+            if peak_demand_match:
+                data["peak_projected_demand_mw"] = clean_number(peak_demand_match)
+                break
+
+        # Peak deficit - improved patterns
+        peak_deficit_patterns = [
+            r"déficit de ([\d,]+) MW",  # Original
+            r"para un déficit de ([\d,]+) MW",  # New format
+            r"un déficit de ([\d,]+) MW",  # Alternative
+        ]
+
+        for pattern in peak_deficit_patterns:
+            peak_deficit_match = re.search(pattern, text, re.IGNORECASE)
+            if peak_deficit_match:
+                data["peak_projected_deficit_mw"] = clean_number(peak_deficit_match)
+                break
+
+        # Peak affectation - improved patterns
+        peak_affectation_patterns = [
+            r"para una afectación de ([\d,]+) MW",  # Original
+            r"afectación estimada de ([\d,]+) MW",  # Alternative original
+            r"se pronostica una afectación de ([\d,]+) MW",  # New format
+            r"afectación de ([\d,]+) MW en este horario",  # New format specific
+        ]
+
+        for pattern in peak_affectation_patterns:
+            peak_affectation_match = re.search(pattern, text, re.IGNORECASE)
+            if peak_affectation_match:
+                data["peak_projected_affectation_mw"] = clean_number(
+                    peak_affectation_match
+                )
+                break
+
+        # Extract midday affectation estimate (new field for June 18th format)
+        midday_affectation_patterns = [
+            r"en el horario de la media se estima una afectación de ([\d,]+) MW",
+            r"horario de la media.*afectación de ([\d,]+) MW",
+            r"Pronóstico para el mediodía:\s*([\d,]+) MW afectados",
+        ]
+
+        for pattern in midday_affectation_patterns:
+            midday_match = re.search(pattern, text, re.IGNORECASE)
+            if midday_match:
+                data["midday_projected_affectation_mw"] = clean_number(midday_match)
+                break
+
+        # Extract solar production - improved patterns
+        solar_production_patterns = [
+            r"Producción de energía de los \d+ parques solares fotovoltaicos: ([\d,]+) MWh",  # Original
+            r"La producción de energía de los \d+ nuevos parques solares fotovoltaicos fue de ([\d,]+) MWh",  # New format
+            r"producción.*parques solares.*fue de ([\d,]+) MWh",  # Generic
+        ]
+
+        for pattern in solar_production_patterns:
+            solar_production_match = re.search(pattern, text, re.IGNORECASE)
+            if solar_production_match:
+                data["solar_production_mwh"] = clean_number(solar_production_match)
+                # Convert MWh to average MW (assuming 6 hours of production)
+                data["solar_production_mw"] = clean_number(solar_production_match) / 6
+                break
+
+        # Extract solar peak power
+        solar_peak_patterns = [
+            r"con ([\d,]+) MW como máxima potencia",  # Both formats use this
+        ]
+
+        for pattern in solar_peak_patterns:
+            solar_peak_match = re.search(pattern, text, re.IGNORECASE)
+            if solar_peak_match:
+                data["solar_peak_power_mw"] = clean_number(solar_peak_match)
+                break
 
         # Extract previous day's maximum affectation
-        prev_affectation_match = re.search(
-            r"máxima afectación (?:en el día de ayer )?fue de ([\d,]+) MW", text
-        )
-        if prev_affectation_match:
-            data["previous_day_max_affectation_mw"] = clean_number(
-                prev_affectation_match
-            )
+        prev_affectation_patterns = [
+            r"máxima afectación (?:en el día de ayer )?fue de ([\d,]+) MW",  # Original
+            r"La máxima afectación en el día de ayer fue de ([\d,]+) MW",  # Both formats
+        ]
+
+        for pattern in prev_affectation_patterns:
+            prev_affectation_match = re.search(pattern, text, re.IGNORECASE)
+            if prev_affectation_match:
+                data["previous_day_max_affectation_mw"] = clean_number(
+                    prev_affectation_match
+                )
+                break
 
         return data
 
@@ -204,6 +288,9 @@ class CubanEnergyReportExtractor:
                 )
                 print(
                     f"  Avg Solar Production (6 hrs): {energy_data.get('solar_production_mw', 'N/A')} MW"
+                )
+                print(
+                    f"  Midday Projected Affectation: {energy_data.get('midday_projected_affectation_mw', 'N/A')} MW"
                 )
 
 
