@@ -334,7 +334,7 @@
 
         const avgDeficit =
           validData.reduce(
-            (sum, d) => sum + (d.energy_data.current_affectation_mw || 0),
+            (sum, d) => sum + (d.energy_data.previous_day_max_affectation_mw || 0),
             0,
           ) / validData.length;
         const avgCapacity =
@@ -429,9 +429,9 @@
             labels: labels,
             datasets: [
               {
-                label: "Déficit Actual",
+                label: "Déficit Máximo",
                 data: energyData.map(
-                  (d) => d.energy_data?.current_affectation_mw || 0,
+                  (d) => d.energy_data?.previous_day_max_affectation_mw || 0,
                 ),
                 backgroundColor: "rgba(239, 68, 68, 0.8)",
                 borderColor: "#ef4444",
@@ -572,7 +572,7 @@
               {
                 label: "Déficit",
                 data: energyData.map(
-                  (d) => d.energy_data?.current_affectation_mw || 0,
+                  (d) => d.energy_data?.previous_day_max_affectation_mw || 0,
                 ),
                 borderColor: "#ef4444",
                 backgroundColor: "rgba(239, 68, 68, 0.1)",
@@ -690,7 +690,7 @@
 
         const avgDeficit =
           validData.reduce(
-            (sum, d) => sum + (d.energy_data.current_affectation_mw || 0),
+            (sum, d) => sum + (d.energy_data.previous_day_max_affectation_mw || 0),
             0,
           ) / validData.length;
         const avgCapacity =
@@ -743,7 +743,7 @@
         if (charts.deficit) {
           charts.deficit.data.labels = labels;
           charts.deficit.data.datasets[0].data = data.map(
-            (d) => d.energy_data?.current_affectation_mw || 0,
+            (d) => d.energy_data?.previous_day_max_affectation_mw || 0,
           );
           charts.deficit.update();
         }
@@ -779,7 +779,7 @@
             (d) => d.energy_data?.demand_mw || 0,
           );
           charts.overview.data.datasets[2].data = data.map(
-            (d) => d.energy_data?.current_affectation_mw || 0,
+            (d) => d.energy_data?.previous_day_max_affectation_mw || 0,
           );
           charts.overview.data.datasets[3].data = data.map(
             (d) => d.energy_data?.solar_production_mw || 0,
